@@ -24,6 +24,7 @@ Autoencoders are neural networks used for unsupervised learning of efficient cod
 Variational Autoencoders (VAEs) are probabilistic generative models that learn a latent representation of the input data by incorporating a stochastic component. Disentangled VAEs extend this approach by encouraging the latent variables to capture distinct and interpretable factors of variation, leading to more controllable generative processes. (https://arxiv.org/abs/1312.6114v10)
 
 ### Disentangled VAE
+$\beta$-Variational Autoencoder
 (https://openreview.net/forum?id=Sy2fzU9gl)
 
 ---
