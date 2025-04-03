@@ -7,10 +7,10 @@ A Survey and Implementation of Modern Anomaly Detection Algorithms using Machine
 - [DAE](#dae)
 - [CAE](#cae)
 
-#Autoencoder
+# Autoencoder
 
-#VAE
+# VAE
 
-#DAE
+# DAE
 
-#CAE
+# CAE
