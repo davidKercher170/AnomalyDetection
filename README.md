@@ -16,19 +16,20 @@ Welcome to my GitHub repository! This project explores various autoencoder archi
 ---
 
 ## Autoencoder
-Autoencoders are neural networks used for unsupervised learning of efficient codings, primarily for the purpose of dimensionality reduction. They work by encoding the input into a compressed representation and then decoding it to recreate the original input, which helps in learning the intrinsic structure of the data.
+Autoencoders are neural networks used for unsupervised learning of efficient codings, primarily for the purpose of dimensionality reduction. They work by encoding the input into a compressed representation and then decoding it to recreate the original input, which helps in learning the intrinsic structure of the data. (https://www.science.org/doi/10.1126/science.1127647)
 
 ---
 
 ## Variational Autoencoder
-Variational Autoencoders (VAEs) are probabilistic generative models that learn a latent representation of the input data by incorporating a stochastic component. Disentangled VAEs extend this approach by encouraging the latent variables to capture distinct and interpretable factors of variation, leading to more controllable generative processes.
+Variational Autoencoders (VAEs) are probabilistic generative models that learn a latent representation of the input data by incorporating a stochastic component. Disentangled VAEs extend this approach by encouraging the latent variables to capture distinct and interpretable factors of variation, leading to more controllable generative processes. (https://arxiv.org/abs/1312.6114v10)
 
 ### Disentangled VAE
+(https://openreview.net/forum?id=Sy2fzU9gl)
 
 ---
 
 ## Denoising Autoencoder
-Denoising Autoencoders (DAEs) are designed to learn robust representations by intentionally corrupting the input data and training the model to recover the original uncorrupted data. This approach forces the network to capture meaningful features and patterns in the data, improving its resilience to noise.
+Denoising Autoencoders (DAEs) are designed to learn robust representations by intentionally corrupting the input data and training the model to recover the original uncorrupted data. This approach forces the network to capture meaningful features and patterns in the data, improving its resilience to noise. (https://dl.acm.org/doi/abs/10.1145/1390156.1390294
 
 ---
 
