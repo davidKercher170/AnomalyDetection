@@ -1,61 +1,11 @@
-class ContrastiveAutoEncoder(tf.keras.Model):
-    def __init__(self, data_dim=61, latent_dim=10):
-        super(ContrastiveAutoEncoder, self).__init__()
-        self.data_dim = data_dim
-        self.latent_dim = latent_dim
-        self.encoder = self.build_encoder()
-        self.decoder = self.build_decoder()
-        self.compile(optimizer='adam')
+from collections import defaultdict
 
-    def call(self, inputs):
-        encoded = self.encoder(inputs)
-        decoded = self.decoder(encoded)
-        return decoded
-
-    def build_encoder(self):
-        # Encoder network: Data Dimension -> 128 -> 64 -> 32 -> Latent Dimension (mean, log_var)
-        inputs = layers.Input(shape=(self.data_dim,))
-
-        x = layers.Dense(128, activation='swish', kernel_regularizer=tf.keras.regularizers.l2(0.0001))(inputs)
-        x = layers.BatchNormalization()(x)
-
-        x = layers.Dense(64, activation='swish', kernel_regularizer=tf.keras.regularizers.l2(0.0001))(x)
-        x = layers.BatchNormalization()(x)
-
-        x = layers.Dense(32, activation='swish', kernel_regularizer=tf.keras.regularizers.l2(0.0001))(x)
-        x = layers.BatchNormalization()(x)
-
-        # Latent Space Parameters - Create a Distribution using Predicted Mean and Standard Deviation
-        latent = layers.Dense(self.latent_dim, activation='swish', kernel_regularizer=tf.keras.regularizers.l2(0.0001))(x)
-
-        encoder = models.Model(inputs, latent, name="encoder")
-        return encoder
-
-    def build_decoder(self):
-        # Decoder Network: Latent Dimension -> 32 -> 64 -> 128 -> Data Dimension (Reconstruct Vector)
-        latent_inputs = layers.Input(shape=(self.latent_dim,))
-        x = layers.Dense(32, activation='swish', kernel_regularizer=tf.keras.regularizers.l2(0.0001))(latent_inputs)
-        x = layers.BatchNormalization()(x)
-
-        x = layers.Dense(64, activation='swish', kernel_regularizer=tf.keras.regularizers.l2(0.0001))(x)
-        x = layers.BatchNormalization()(x)
-
-        x = layers.Dense(128, activation='swish', kernel_regularizer=tf.keras.regularizers.l2(0.0001))(x)
-        x = layers.BatchNormalization()(x)
-
-        # Reconstruct the Data of given Dimension
-        decoded = layers.Dense(self.data_dim, activation='sigmoid')(x)
-        decoder = models.Model(latent_inputs, decoded, name="decoder")
-        return decoder
-
-    # For VAE Model
-    def sampling(self, args):
-        z_mean, z_log_var = args
-        batch = tf.shape(z_mean)[0]
-        dim = tf.shape(z_mean)[1]
-        epsilon = tf.keras.backend.random_normal(shape=(batch, dim))
-        z = z_mean + tf.exp(0.5 * z_log_var) * epsilon # Mean + Standard Deviation * Epsilon
-        return z
+class ContrastiveAutoEncoder(AutoEncoder):
+    def __init__(self, data_dim=61, latent_dim=10, reconstruction_weight=1.0, contrastive_weight=0.5, name="cae"):
+        super().__init__(data_dim, latent_dim, name)
+        self.reconstruction_weight = reconstruction_weight
+        self.contrastive_weight = contrastive_weight # For Contrastive Loss
+        if reconstruction_weight==0.0: self.name = self.name+"_no_recon"
 
     # Uses the simCLR Loss
     def contrastive_loss(self, z1, z2, temperature=0.5):
@@ -65,27 +15,33 @@ class ContrastiveAutoEncoder(tf.keras.Model):
         labels = tf.eye(tf.shape(z1)[0]) # Diagonal Entries are the Positive Cases
         return tf.reduce_mean(tf.keras.losses.categorical_crossentropy(labels, similarities, from_logits=True))
 
+    @tf.function
     def train_step(self, x1, x2):
         with tf.GradientTape() as tape:
-            z1 = self.encoder(x1) # Latent Representation 1
-            z2 = self.encoder(x2) # Latent Representation 2
+            z1 = self.get_latent_vector(x1) # Latent Representation 1
+            z2 = self.get_latent_vector(x2) # Latent Representation 2
 
             # Reconstruction Loss
             y1 = self.decoder(z1) # Reconstruction 1
-            reconstruction_loss = tf.reduce_mean(tf.keras.losses.mse(x1, y1)) # Compute reconstruction loss using Mean Squared Error
+            reconstruction_loss = tf.reduce_mean(tf.keras.losses.mse(x1, y1))*self.data_dim # Compute reconstruction loss using Mean Squared Error
 
-            contrastive_loss = self.contrastive_loss(z1, z2) # Contrastive Loss
-            total_loss = reconstruction_loss + 0.5*contrastive_loss # Combine Losses
+            contrastive_loss = (self.contrastive_loss(z1, z2) + self.contrastive_loss(z2, z1))/2 # Contrastive Loss
+            total_loss = self.reconstruction_weight*reconstruction_loss + self.contrastive_weight*contrastive_loss # Combine Losses
 
         grads = tape.gradient(total_loss, self.trainable_variables)
         self.optimizer.apply_gradients(zip(grads, self.trainable_variables))
 
         # Return a dictionary mapping metric names to current loss values.
-        return total_loss
+        return {"loss": total_loss,
+                "reconstruction_loss": self.reconstruction_weight*reconstruction_loss,
+                "contrastive_loss": self.contrastive_weight*contrastive_loss}
+
+    def get_latent_vector(self, inputs):
+        return self.encoder(inputs) # Get the Vectors from the Latent Dimension
 
         # Inputs: Preprocessed Data, Data: Raw Data to label, Alpha: STD Scalar
-    def find_anomalies(self, inputs, data, alpha=2):
-        latent_vectors = self.encoder(inputs) # Get the Vectors from the Latent Dimension
+    def calculate_anomalies(self, inputs, alpha=2):
+        latent_vectors = self.get_latent_vector(inputs) # Get the Vectors from the Latent Dimension
         reconstructed_data = self.decoder(latent_vectors) # Reconstruct the data using the model
         reconstruction_error = np.mean(np.square(reconstructed_data-inputs), axis=1) # Calculate Reconstruction Error
 
@@ -95,11 +51,49 @@ class ContrastiveAutoEncoder(tf.keras.Model):
         recon_error_norm = (reconstruction_error - np.mean(reconstruction_error)) / np.std(reconstruction_error) # Normalize Reconstruction Error
         latent_distance_norm = (latent_distance - np.mean(latent_distance)) / np.std(latent_distance) # Normalize Latent Distance
 
-        combined_error = recon_error_norm + latent_distance_norm # Total Error
+        combined_error = self.reconstruction_weight*recon_error_norm + self.contrastive_weight*latent_distance_norm # Total Weighted Error
         threshold = np.mean(combined_error) + alpha*np.std(combined_error) # Threshold for Anomalies
         anomalies = combined_error > threshold
 
-        data['FRAUD_PRED'] = anomalies
-        data_sorted = data[data['FRAUD_PRED'] == True].sort_values(by='FRAUD_PRED')
-        data_sorted.to_csv('cae_results.csv')
-        print("Anomaly Count: ", len(data_sorted))
+        return anomalies
+
+    def training_loop(self, dataset, epochs):
+      for epoch in range(epochs):
+        epoch_losses = defaultdict(float)
+        for batch in dataset:
+          x1 = self.augment_data(batch.numpy())
+          x2 = self.augment_data(batch.numpy()) # Positive/Negative Pairs (for each datapoint in batch)
+          x1 = tf.convert_to_tensor(x1)
+          x2 = tf.convert_to_tensor(x2)
+
+          loss_dict = self.train_step(x1, x2)
+          for key, value in loss_dict.items():
+            epoch_losses[key] += value.numpy()
+
+        avg_losses = {key: loss_val / len(dataset) for key, loss_val in epoch_losses.items()}
+        losses_str = ", ".join([f"{key}: {avg_losses[key]:.3f}" for key in avg_losses])
+        if (epoch+1) % 5 == 0:
+          print(f"Epoch {epoch+1}, Losses: {losses_str}")
+
+    def augment_data(self, x, noise_factor=0.05):
+        x_noisy = self.noise_data(x, noise_factor)
+        x_dropout = self.dropout_data(x_noisy)
+        return x_dropout
+
+    def noise_data(self, x, noise_factor=0.1):
+      noise = noise_factor * np.random.normal(loc=0.0, scale=1.0, size=x.shape)
+      return x + noise
+
+    def dropout_data(self, x, dropout_rate=0.1):
+      # 3. Dropout: randomly drop features (set to zero) per sample
+      dropout_mask = np.random.binomial(1, 1 - dropout_rate, size=x.shape)
+      return x * dropout_mask
+
+    def run_model(self, data, epochs=50, batch_size=512, buffer_size=5000):
+      data_model=data.copy()
+      features_dict = {name: np.array(value) for name, value in train.items()}
+      preprocessed_features = model_preprocessing(features_dict)  # Preprocess the input features
+      dataset = tf.data.Dataset.from_tensor_slices(preprocessed_features)
+      dataset = dataset.shuffle(buffer_size).batch(batch_size)
+      self.training_loop(dataset, epochs)
+      self.find_anomalies(preprocessed_features, data_model)
