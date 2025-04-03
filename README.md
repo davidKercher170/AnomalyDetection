@@ -1,8 +1,4 @@
-# AnomalyDetection
-A Survey and Implementation of Modern Anomaly Detection Algorithms using Machine Learning.
-
-# GitHub Repository README
-
+# Anomaly Detection Algorithms
 Welcome to my GitHub repository! This project explores various autoencoder architectures with a focus on enhancing representation learning through different innovative methods. Dive into the sections below to learn more about each technique and its unique contributions. 🚀
 
 ## Table of Contents
