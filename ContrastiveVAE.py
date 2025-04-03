@@ -62,7 +62,7 @@ class ContrastiveVAE(ContrastiveAutoEncoder):
             ) * self.beta
 
             # Contrastive Loss
-            contrastive_loss = self.contrastive_loss(z1, z2) # Contrastive Loss
+            contrastive_loss = (self.contrastive_loss(z1, z2) + self.contrastive_loss(z2, z1))/2 # Contrastive Loss
             total_loss = self.reconstruction_weight*(reconstruction_loss + kl_loss) + self.contrastive_weight*contrastive_loss # Combine Losses
 
         grads = tape.gradient(total_loss, self.trainable_variables)
