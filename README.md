@@ -3,7 +3,7 @@ Welcome to my GitHub repository! This project explores various autoencoder archi
 
 ## Table of Contents
 - [Autoencoder](#autoencoder)
-- [Variational Autoencoder (and Disentangled VAE)](#variational-autoencoder)
+- [Variational Autoencoder](#variational-autoencoder)
   - [Disentangled VAE](#disentangled-vae)
 - [Denoising Autoencoder](#denoising-autoencoder)
 - [Contrastive Autoencoder](#contrastive-autoencoder)
