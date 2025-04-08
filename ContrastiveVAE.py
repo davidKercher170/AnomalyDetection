@@ -48,9 +48,10 @@ class ContrastiveVAE(ContrastiveAutoEncoder):
             z_mean, z_log_var = self.encoder(x1)
             z1 = self.sampling([z_mean, z_log_var]) # First Latent Vector from Distribution
 
+            # Optional - Use augmented x2 or draw from the the distribution
             # z2 = self.encoder(x2) # Latent Representation 1
             # z2_mean, z2_log_var = self.encoder(x2)
-            z2 = self.sampling([z_mean, z_log_var]) # First Latent Vector from Distribution
+            z2 = self.sampling([z_mean, z_log_var]) # Second Latent Vector from Distribution
 
             # Reconstruction Loss
             y1 = self.decoder(z1) # Reconstruction 1
