@@ -34,7 +34,7 @@ Denoising Autoencoders (DAEs) are designed to learn robust representations by in
 ---
 
 ## Contrastive Autoencoder
-Contrastive Autoencoders integrate contrastive learning principles into the autoencoder framework, aiming to improve feature extraction by distinguishing between similar and dissimilar data pairs. This method helps in learning more discriminative representations that are useful for downstream tasks. To implement a Contrastive Autoencoder, we use the same autoencoder model but add a contrastive loss function. The contrastive loss looks at the difference between latent representations in our batch with a single target pair and $N-1$ negative pairs. We calculate this using the NT-Xent Loss (https://dl.acm.org/doi/pdf/10.5555/3157096.3157304) and cosine similarity $D_P$ and $D_N$ for Positive and Negative pairs:
+Contrastive Autoencoders integrate contrastive learning principles into the autoencoder framework, aiming to improve feature extraction by distinguishing between similar and dissimilar data pairs. This method helps in learning more discriminative representations that are useful for downstream tasks. To implement a Contrastive Autoencoder, we use the same autoencoder model but add a contrastive loss function. The contrastive loss looks at the difference between latent representations in our batch with a single target pair and $N-1$ negative pairs. We calculate this using the NT-Xent Loss (https://dl.acm.org/doi/pdf/10.5555/3157096.3157304) with temperature parameter $\tau$ and cosine similarity $D_P$ and $D_N$ for Positive and Negative pairs:
 
 $$L = -\mathrm{log}\frac{e^{D_P/\tau}}{\sum_{k=1}^{N} e^{D_N/\tau}}$$
 $$D(u,v) = \frac{u^Tv}{|u|_2 |v|_2}$$
