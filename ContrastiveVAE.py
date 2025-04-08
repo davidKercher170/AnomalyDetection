@@ -48,10 +48,9 @@ class ContrastiveVAE(ContrastiveAutoEncoder):
             z_mean, z_log_var = self.encoder(x1)
             z1 = self.sampling([z_mean, z_log_var]) # First Latent Vector from Distribution
 
-            # Optional - Use augmented x2 or draw from the the distribution
             # z2 = self.encoder(x2) # Latent Representation 1
             # z2_mean, z2_log_var = self.encoder(x2)
-            z2 = self.sampling([z_mean, z_log_var]) # Second Latent Vector from Distribution
+            z2 = self.sampling([z_mean, z_log_var]) # First Latent Vector from Distribution
 
             # Reconstruction Loss
             y1 = self.decoder(z1) # Reconstruction 1
@@ -74,3 +73,19 @@ class ContrastiveVAE(ContrastiveAutoEncoder):
                 "reconstruction_loss": self.reconstruction_weight*reconstruction_loss,
                 "kl_loss": self.reconstruction_weight*kl_loss,
                 "contrastive_loss": self.contrastive_weight*contrastive_loss}
+
+    def training_loop(self, dataset, epochs):
+      for epoch in range(epochs):
+        epoch_losses = defaultdict(float)
+        for batch in dataset:
+          x1 = tf.convert_to_tensor(batch.numpy())
+          x2 = tf.convert_to_tensor(batch.numpy())
+
+          loss_dict = self.train_step(x1, x2)
+          for key, value in loss_dict.items():
+            epoch_losses[key] += value.numpy()
+
+        avg_losses = {key: loss_val / len(dataset) for key, loss_val in epoch_losses.items()}
+        losses_str = ", ".join([f"{key}: {avg_losses[key]:.3f}" for key in avg_losses])
+        if (epoch+1) % 5 == 0:
+          print(f"Epoch {epoch+1}, Losses: {losses_str}")
