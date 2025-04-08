@@ -21,24 +21,23 @@ Autoencoders are neural networks used for unsupervised learning of efficient cod
 ---
 
 ## Variational Autoencoder
-Variational Autoencoders (VAEs) are probabilistic generative models that learn a latent representation of the input data by incorporating a stochastic component. Disentangled VAEs extend this approach by encouraging the latent variables to capture distinct and interpretable factors of variation, leading to more controllable generative processes. (https://arxiv.org/abs/1312.6114v10)
+Variational Autoencoders (VAEs) are probabilistic generative models that learn a latent representation of the input data by incorporating a stochastic component (https://arxiv.org/abs/1312.6114v10). In a VAE, instead of the encoder outputting the latent representation of the input data, the encoder outputs two values representing the mean ($\mu$) and variance ($\sigma$) for a Normal Distribution. We then sample from the produced distribution to get the latent distribution to feed into our decoder model.
 
 ### Disentangled VAE
-$\beta$-Variational Autoencoder
-(https://openreview.net/forum?id=Sy2fzU9gl)
+$\beta$-Variational Autoencoders extend this approach by encouraging the latent variables to capture distinct and interpretable factors of variation, leading to more controllable generative processes (https://openreview.net/forum?id=Sy2fzU9gl). To implement this, we simply introduce the parameter $\beta \in (1,3)$ to scale the KL Loss.
 
 ---
 
 ## Denoising Autoencoder
-Denoising Autoencoders (DAEs) are designed to learn robust representations by intentionally corrupting the input data and training the model to recover the original uncorrupted data. This approach forces the network to capture meaningful features and patterns in the data, improving its resilience to noise. (https://dl.acm.org/doi/abs/10.1145/1390156.1390294
+Denoising Autoencoders (DAEs) are designed to learn robust representations by intentionally corrupting the input data and training the model to recover the original uncorrupted data. This approach forces the network to capture meaningful features and patterns in the data, improving its resilience to noise. (https://dl.acm.org/doi/abs/10.1145/1390156.1390294) In practice, we add a Gaussian Noise to the inputs before feeding into the encoder model.
 
 ---
 
 ## Contrastive Autoencoder
-Contrastive Autoencoders integrate contrastive learning principles into the autoencoder framework, aiming to improve feature extraction by distinguishing between similar and dissimilar data pairs. This method helps in learning more discriminative representations that are useful for downstream tasks.
+Contrastive Autoencoders integrate contrastive learning principles into the autoencoder framework, aiming to improve feature extraction by distinguishing between similar and dissimilar data pairs. This method helps in learning more discriminative representations that are useful for downstream tasks. To implement a Contrastive Autoencoder, we use the same autoencoder model but add a contrastive loss function. The contrastive loss looks at the difference between latent representations in our batch with a single target pair and $N-1$ negative pairs. We calculate this using the NT-Xent Loss (https://dl.acm.org/doi/pdf/10.5555/3157096.3157304) with distances computed by Scaled Cosine Similarities. To generate pairs, we use our initial batch of $N$ datapoints and produce and augmented set of datapoints by introducing noise. The single positive pair consists of the diagonal entries (mapping each datapoint to it's augmentation), while rest of the batch gives us our negative pairs. In research, it has been discovered that larger batch sizes typically produce stronger results. For this model, we can train through reconstruction loss and contrastive loss or just with contrastive loss.
 
 ### VAE with Contrastive
-In this variant, a Variational Autoencoder is combined with contrastive learning to leverage the strengths of both probabilistic modeling and discriminative feature learning. The approach enhances the latent space by ensuring that similar data points are closer together while pushing apart dissimilar ones.
+In this variant, a Variational Autoencoder is combined with contrastive learning to leverage the strengths of both probabilistic modeling and discriminative feature learning. The approach enhances the latent space by ensuring that similar data points are closer together while pushing apart dissimilar ones. CVAE differs from our Contrastive Autoencoder in how the data is augmented. Rather than introducing noise to our input data, we produce our augmentations by sampling twice from the latent probability distribution. 
 
 ### DAE with Contrastive
 Similarly, the Denoising Autoencoder variant with contrastive learning integrates noise robustness with the benefits of contrastive methods. This hybrid technique aims to further refine the learned representations by enforcing similarity constraints even in the presence of data corruption.
