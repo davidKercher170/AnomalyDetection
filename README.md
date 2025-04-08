@@ -16,7 +16,7 @@ Welcome to my GitHub repository! This project explores various autoencoder archi
 ---
 
 ## Autoencoder
-Autoencoders are neural networks used for unsupervised learning of efficient codings, primarily for the purpose of dimensionality reduction. They work by encoding the input into a compressed representation and then decoding it to recreate the original input, which helps in learning the intrinsic structure of the data. (https://www.science.org/doi/10.1126/science.1127647)
+Autoencoders are neural networks used for unsupervised learning of efficient codings, primarily for the purpose of dimensionality reduction. They work by encoding the input into a compressed representation and then decoding it to recreate the original input, which helps in learning the intrinsic structure of the data (https://www.science.org/doi/10.1126/science.1127647). When we deconstruct and then reconstruct datapoints, we designate anomalies as datapoints that the model cannot accurately reconstruct. This is the process I use for Anomaly Detection, where I search for datapoints with reconstruction loss greater than $\alpha \sigma$, where $\alpha \in (1,2)$ is a chosen parameter and $\sigma$ is the standard deviation of the reconstruction loss across all datapoints.
 
 ---
 
