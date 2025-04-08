@@ -45,12 +45,12 @@ class ContrastiveVAE(ContrastiveAutoEncoder):
     def train_step(self, x1, x2):
         with tf.GradientTape() as tape:
             z1 = self.encoder(x1) # Latent Representation 1
-            z1_mean, z1_log_var = self.encoder(x1)
-            z1 = self.sampling([z1_mean, z1_log_var])
+            z_mean, z_log_var = self.encoder(x1)
+            z1 = self.sampling([z_mean, z_log_var]) # First Latent Vector from Distribution
 
-            z2 = self.encoder(x2) # Latent Representation 1
-            z2_mean, z2_log_var = self.encoder(x2)
-            z2 = self.sampling([z2_mean, z2_log_var])
+            # z2 = self.encoder(x2) # Latent Representation 1
+            # z2_mean, z2_log_var = self.encoder(x2)
+            z2 = self.sampling([z_mean, z_log_var]) # First Latent Vector from Distribution
 
             # Reconstruction Loss
             y1 = self.decoder(z1) # Reconstruction 1
@@ -58,11 +58,11 @@ class ContrastiveVAE(ContrastiveAutoEncoder):
 
             # Compute KL divergence loss
             kl_loss = -0.5 * tf.reduce_mean(
-                1 + z1_log_var - tf.square(z1_mean) - tf.exp(z1_log_var)
+                1 + z_log_var - tf.square(z_mean) - tf.exp(z_log_var)
             ) * self.beta
 
             # Contrastive Loss
-            contrastive_loss = (self.contrastive_loss(z1, z2) + self.contrastive_loss(z2, z1))/2 # Contrastive Loss
+            contrastive_loss = self.contrastive_loss(z1, z2) # Contrastive Loss
             total_loss = self.reconstruction_weight*(reconstruction_loss + kl_loss) + self.contrastive_weight*contrastive_loss # Combine Losses
 
         grads = tape.gradient(total_loss, self.trainable_variables)
