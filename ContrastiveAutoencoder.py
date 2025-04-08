@@ -8,12 +8,41 @@ class ContrastiveAutoEncoder(AutoEncoder):
         if reconstruction_weight==0.0: self.name = self.name+"_no_recon"
 
     # Uses the simCLR Loss
-    def contrastive_loss(self, z1, z2, temperature=0.5):
+    def contrastive_loss_old(self, z1, z2, temperature=0.07):
         z1 = tf.math.l2_normalize(z1, axis=1) # Normalize
         z2 = tf.math.l2_normalize(z2, axis=1) # Normalize
         similarities = tf.matmul(z1, z2, transpose_b=True) / temperature # Use the Dot Product to Get the Similarities
         labels = tf.eye(tf.shape(z1)[0]) # Diagonal Entries are the Positive Cases
         return tf.reduce_mean(tf.keras.losses.categorical_crossentropy(labels, similarities, from_logits=True))
+
+    def contrastive_loss(self, z1, z2, temperature=0.07):
+        """
+        Compute the Normalized Temperature-scaled Cross Entropy (NT-Xent) loss.
+
+        Args:
+            z1, z2: latent representations for two augmented views, shape (batch_size, latent_dim)
+            temperature: scaling hyperparameter.
+
+        Returns:
+            Scalar loss value.
+        """
+        # Normalize the latent vectors along the feature dimension.
+        z1 = tf.math.l2_normalize(z1, axis=1)
+        z2 = tf.math.l2_normalize(z2, axis=1)
+
+        # Compute similarity logits as scaled cosine similarities.
+        logits = tf.matmul(z1, z2, transpose_b=True) / temperature  # shape: [batch_size, batch_size]
+
+        # The positive pairs are along the diagonal.
+        batch_size = tf.shape(logits)[0]
+        labels = tf.range(batch_size)
+
+        # Compute the cross-entropy loss. For each row, the positive sample is at the index that matches the row.
+        loss = tf.nn.sparse_softmax_cross_entropy_with_logits(labels=labels, logits=logits)
+
+        # Return the mean loss over the batch.
+        return tf.reduce_mean(loss)
+
 
     @tf.function
     def train_step(self, x1, x2):
@@ -25,7 +54,7 @@ class ContrastiveAutoEncoder(AutoEncoder):
             y1 = self.decoder(z1) # Reconstruction 1
             reconstruction_loss = tf.reduce_mean(tf.keras.losses.mse(x1, y1))*self.data_dim # Compute reconstruction loss using Mean Squared Error
 
-            contrastive_loss = (self.contrastive_loss(z1, z2) + self.contrastive_loss(z2, z1))/2 # Contrastive Loss
+            contrastive_loss = self.contrastive_loss(z1, z2) # Contrastive Loss
             total_loss = self.reconstruction_weight*reconstruction_loss + self.contrastive_weight*contrastive_loss # Combine Losses
 
         grads = tape.gradient(total_loss, self.trainable_variables)
@@ -75,14 +104,14 @@ class ContrastiveAutoEncoder(AutoEncoder):
         if (epoch+1) % 5 == 0:
           print(f"Epoch {epoch+1}, Losses: {losses_str}")
 
-    def augment_data(self, x, noise_factor=0.05):
-        x_noisy = self.noise_data(x, noise_factor)
+    def augment_data(self, x, stddev=0.05):
+        x_noisy = self.noise_data(x, stddev)
         x_dropout = self.dropout_data(x_noisy)
         return x_dropout
 
-    def noise_data(self, x, noise_factor=0.1):
-      noise = noise_factor * np.random.normal(loc=0.0, scale=1.0, size=x.shape)
-      return x + noise
+    def noise_data(self, x, stddev=0.005):
+      noise = tf.random.normal(shape=tf.shape(x), mean=0.0, stddev=stddev)
+      return tf.clip_by_value(x + noise, 0., 1.)
 
     def dropout_data(self, x, dropout_rate=0.1):
       # 3. Dropout: randomly drop features (set to zero) per sample
