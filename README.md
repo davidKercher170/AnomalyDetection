@@ -59,7 +59,10 @@ Similarly, the Denoising Autoencoder variant with contrastive learning integrate
 
 ### Performance
 
-![ModelGraph](https://github.com/user-attachments/assets/61d10888-a5be-47e4-b887-2cd668a6fbc6)
+To test the performance of the model, I examine a disease detection dataset consisting of thyroid data with rare cases of diagnosed hypothroid. We will apply each model and gauge the performance in detecting hypothyroid by using the AUC-PR evaluation metric. (Dataset: https://arxiv.org/pdf/1911.08623)
+![PerformanceReview](https://github.com/user-attachments/assets/2a23f550-d332-4b2d-802b-3e79deb55a2c)
+
+---
 
 ## Additional Information
 This repository contains implementations, experiments, and visualizations related to various autoencoder models. Contributions, feedback, and discussions are highly welcome. Feel free to explore the code, open issues, or reach out if you have questions. 😊
