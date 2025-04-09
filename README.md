@@ -11,7 +11,6 @@ Welcome to my GitHub repository! This project explores various autoencoder archi
   - [DAE with Contrastive](#dae-with-contrastive)
 - [Performance](#performance.)
 - [Additional Information](#additional-information)
-- [Contributing](#contributing)
 - [Contact](#contact)
 
 ---
@@ -67,11 +66,6 @@ To test the performance of the model, I examine a disease detection dataset cons
 
 ## Additional Information
 This repository contains implementations, experiments, and visualizations related to various autoencoder models. Contributions, feedback, and discussions are highly welcome. Feel free to explore the code, open issues, or reach out if you have questions. 😊
-
----
-
-## Contributing
-Contributions are the heart of open source! If you have suggestions or improvements, please open an issue or submit a pull request. Follow the [contribution guidelines](CONTRIBUTING.md) for details on how to get started.
 
 ---
 
