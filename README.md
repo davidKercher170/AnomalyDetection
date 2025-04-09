@@ -60,7 +60,8 @@ Similarly, the Denoising Autoencoder variant with contrastive learning integrate
 ### Performance
 
 To test the performance of the model, I examine a disease detection dataset consisting of thyroid data with rare cases of diagnosed hypothroid. We will apply each model and gauge the performance in detecting hypothyroid by using the AUC-PR evaluation metric. (Dataset: https://arxiv.org/pdf/1911.08623)
-![PerformanceReview](https://github.com/user-attachments/assets/2a23f550-d332-4b2d-802b-3e79deb55a2c)
+
+![PerfRev1](https://github.com/user-attachments/assets/5fa0b2de-ad0c-4073-b89d-2125d6686ce2)
 
 ---
 
