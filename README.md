@@ -1,5 +1,5 @@
 # Anomaly Detection Algorithms
-Welcome to my GitHub repository! This project explores various autoencoder architectures with a focus on enhancing representation learning through different innovative methods. I've also included a quick performance test of each algorithm on Thyroid Cancer Dataset. Dive into the sections below to learn more about each technique and its unique contributions. 🚀
+Welcome to my GitHub repository! This project explores various autoencoder architectures with a focus on enhancing representation learning through different innovative methods. I've also included a quick performance test of each algorithm on a Health Care Dataset with real world Thyroid data and rare instances of a Hyperthyroid Diagnosis. Dive into the sections below to learn more about each technique and its unique contributions. 🚀
 
 ## Table of Contents
 - [Autoencoder](#autoencoder)
