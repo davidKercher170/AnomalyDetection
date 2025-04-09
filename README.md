@@ -1,5 +1,5 @@
 # Anomaly Detection Algorithms
-Welcome to my GitHub repository! This project explores various autoencoder architectures with a focus on enhancing representation learning through different innovative methods. Dive into the sections below to learn more about each technique and its unique contributions. 🚀
+Welcome to my GitHub repository! This project explores various autoencoder architectures with a focus on enhancing representation learning through different innovative methods. I've also included a quick performance test of each algorithm on Thyroid Cancer Dataset. Dive into the sections below to learn more about each technique and its unique contributions. 🚀
 
 ## Table of Contents
 - [Autoencoder](#autoencoder)
@@ -9,6 +9,7 @@ Welcome to my GitHub repository! This project explores various autoencoder archi
 - [Contrastive Autoencoder](#contrastive-autoencoder)
   - [VAE with Contrastive](#vae-with-contrastive)
   - [DAE with Contrastive](#dae-with-contrastive)
+- [Performance](#performance.)
 - [Additional Information](#additional-information)
 - [Contributing](#contributing)
 - [Contact](#contact)
@@ -17,6 +18,8 @@ Welcome to my GitHub repository! This project explores various autoencoder archi
 
 ## Autoencoder
 Autoencoders are neural networks used for unsupervised learning of efficient codings, primarily for the purpose of dimensionality reduction. They work by encoding the input into a compressed representation and then decoding it to recreate the original input, which helps in learning the intrinsic structure of the data (https://www.science.org/doi/10.1126/science.1127647). When we deconstruct and then reconstruct datapoints, we designate anomalies as datapoints that the model cannot accurately reconstruct. This is the process I use for Anomaly Detection, where I search for datapoints with reconstruction loss greater than $\alpha * \sigma$, where $\alpha \in (1,2)$ is a chosen parameter and $\sigma$ is the standard deviation of the reconstruction loss across all datapoints.
+
+![AutoencoderImage](https://github.com/user-attachments/assets/0f3abaea-a6af-40fb-89bf-9e0f405d8246)
 
 ---
 
@@ -41,6 +44,9 @@ $$D(u,v) = \frac{u^Tv}{|u|_2 |v|_2}$$
 
 with distances computed by Scaled Cosine Similarities To generate pairs, we use our initial batch of $N$ datapoints and produce and augmented set of datapoints by introducing noise. The single positive pair consists of the diagonal entries (mapping each datapoint to it's augmentation), while rest of the batch gives us our negative pairs. In research, it has been discovered that larger batch sizes typically produce stronger results. 
 
+![ContrastiveLearning](https://github.com/user-attachments/assets/14fbcf42-004e-4f5b-90b6-1f4d4d067872)
+
+
 For this model, we can train through reconstruction loss and contrastive loss or just with contrastive loss. Additionaly, we can optionally make use of a projection head to seperate the reconstruction and contrastive losses. The projection head takes the latent representations as input and outputs vectors to feed into the contrastive loss. Seperately, the decoder decodes our initial laten representations and computes the reconstruction loss.
 
 ### VAE with Contrastive
@@ -50,6 +56,10 @@ In this variant, a Variational Autoencoder is combined with contrastive learning
 Similarly, the Denoising Autoencoder variant with contrastive learning integrates noise robustness with the benefits of contrastive methods. This hybrid technique aims to further refine the learned representations by enforcing similarity constraints even in the presence of data corruption.
 
 ---
+
+### Performance
+
+![ModelGraph](https://github.com/user-attachments/assets/61d10888-a5be-47e4-b887-2cd668a6fbc6)
 
 ## Additional Information
 This repository contains implementations, experiments, and visualizations related to various autoencoder models. Contributions, feedback, and discussions are highly welcome. Feel free to explore the code, open issues, or reach out if you have questions. 😊
